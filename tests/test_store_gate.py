@@ -47,3 +47,11 @@ def test_gate():
     assert should_run(at(29, 18), "2026-10-29", False)[0] is False  # second firing same day
     assert should_run(at(27, 9), "2026-10-26", True)[0] is True     # manual always runs
     assert config.RUN_EVERY_DAYS == 3 and config.RUN_AT_HOUR == 17
+
+
+def test_matches_split_by_condition():
+    from tracker.render import page_section
+    assert page_section({"section": "match", "condition": "renovated"}) == "match_full"
+    assert page_section({"section": "match", "condition": "new"}) == "match_full"
+    assert page_section({"section": "match", "condition": "partial"}) == "match_partial"
+    assert page_section({"section": "near", "condition": "partial"}) == "near"
