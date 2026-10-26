@@ -7,8 +7,13 @@ from pathlib import Path
 from . import config
 
 SECTIONS = [
-    ("match", f"Matches, {config.PRICE_MIN // 1000}–{config.PRICE_MAX // 1000} 000 €", "matches",
-     "Every rule confirmed: 3 or 3,5 rooms, at least 60 m², balcony, 2nd floor or higher, not in original condition."),
+    ("match_full", f"Fully renovated or new build, {config.PRICE_MIN // 1000}–{config.PRICE_MAX // 1000} 000 €",
+     "fully renovated",
+     "Every rule confirmed: 3 or 3,5 rooms, at least 60 m², balcony, 2nd floor or higher. "
+     "Kompletná rekonštrukcia or novostavba."),
+    ("match_partial", f"Partly renovated, {config.PRICE_MIN // 1000}–{config.PRICE_MAX // 1000} 000 €",
+     "partly renovated",
+     "Same rules, but only čiastočná rekonštrukcia. Budget for the remaining work when comparing prices."),
     ("near", f"Near misses, {config.PRICE_MAX // 1000}–{config.NEAR_MISS_MAX // 1000} 000 €", "near misses",
      "Slightly over budget. Worth an offer, especially if listed for weeks or already reduced."),
     ("check", "Needs a manual check", "to check",
@@ -184,8 +189,16 @@ render();
 """
 
 
+def page_section(row: dict) -> str:
+    """Matches are split by condition into two tables."""
+    if row["section"] != "match":
+        return row["section"]
+    return "match_partial" if row.get("condition") == "partial" else "match_full"
+
+
 def render(rows: list[dict], updated: str, out: Path = Path("docs/index.html")) -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
+    rows = [{**r, "section": page_section(r)} for r in rows]
     html = (TEMPLATE
             .replace("__DATA__", json.dumps(rows, ensure_ascii=False).replace("</", "<\\/"))
             .replace("__SECTIONS__", json.dumps(SECTIONS, ensure_ascii=False))

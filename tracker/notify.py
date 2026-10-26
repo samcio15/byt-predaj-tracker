@@ -35,7 +35,10 @@ def build_messages(new: list[dict], drops: list[tuple[dict, float]], new_check: 
                      "match or nearly match. From now on you get new listings and price drops here.")
     else:
         for r in new:
-            tag = "🆕" if r["section"] == "match" else "🟡 near miss"
+            if r["section"] == "match":
+                tag = "🆕 partly renovated" if r.get("condition") == "partial" else "🆕 fully renovated"
+            else:
+                tag = "🟡 near miss"
             parts.append(f"{tag}\n{_row(r)}")
         for r, old in drops:
             cut = old - r["price"]
